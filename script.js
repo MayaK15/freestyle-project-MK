@@ -1,104 +1,77 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const stockButtons = document.querySelectorAll(".stock-btn");
-  const stockName = document.getElementById("stock-name");
-  const stockPrice = document.getElementById("stock-price");
-  const stockChange = document.getElementById("stock-change");
-  const stockChartCanvas = document.getElementById("stock-chart");
+const apiKey = '24OOJH4HROXTC50E';
 
-  const API_KEY = 'XNC1V0YJ3C84UWJS';
-  const API_URL = 'https://www.alphavantage.co/query';
+// HTML elements
+const stockName = document.getElementById('stock-name');
+const stockPrice = document.getElementById('stock-price');
+const stockChange = document.getElementById('stock-change');
+const stockChart = document.getElementById('stock-chart');
 
-  let chart; // Reference to the Chart.js chart
+// Stock buttons
+const stockButtons = document.querySelectorAll('.stock-btn');
 
-  stockButtons.forEach(button => {
-    button.addEventListener("click", () => {
-      const stockSymbol = button.getAttribute("data-symbol");
-      fetchStockData(stockSymbol);
-    });
+// Chart setup
+const chart = new Chart(stockChart, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [{
+      label: 'Stock Price',
+      data: [],
+      borderColor: 'rgb(255, 99, 132)',
+      fill: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      x: { title: { display: true, text: 'Date' } },
+      y: { title: { display: true, text: 'Price (USD)' } }
+    }
+  }
+});
+
+// Fetch stock data from Alpha Vantage
+async function fetchStockData(symbol) {
+  const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // Check if the data is valid
+    if (data['Time Series (Daily)']) {
+      const timeSeries = data['Time Series (Daily)'];
+      const dates = Object.keys(timeSeries).reverse();
+      const prices = dates.map(date => timeSeries[date]['4. close']);
+      const latestPrice = prices[0];
+      const priceChange = (latestPrice - prices[1]).toFixed(2); // Price change from the previous day
+
+      // Update the stock info
+      stockName.textContent = `Stock: ${symbol}`;
+      stockPrice.textContent = `Current Price: $${latestPrice}`;
+      stockChange.textContent = `Change: $${priceChange}`;
+
+      // Update the chart
+      chart.data.labels = dates;
+      chart.data.datasets[0].data = prices;
+      chart.update();
+    } else {
+      stockName.textContent = 'Error fetching data.';
+      stockPrice.textContent = '';
+      stockChange.textContent = '';
+    }
+  } catch (error) {
+    console.error('Error fetching stock data:', error);
+    stockName.textContent = 'Error fetching data.';
+    stockPrice.textContent = '';
+    stockChange.textContent = '';
+  }
+}
+
+// Event listener for each stock button
+stockButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const symbol = button.getAttribute('data-symbol');
+    fetchStockData(symbol);
   });
-
-  function fetchStockData(symbol) {
-    fetch(`${API_URL}?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log(data); // Log the response to inspect it
-
-        if (data["Note"]) {
-          alert("API Rate limit exceeded. Please wait a minute or try again later.");
-          stockName.innerText = "Rate limit exceeded";
-          stockPrice.innerText = "";
-          stockChange.innerText = "Please wait a minute.";
-          return;
-        }
-
-        if (data["Time Series (5min)"]) {
-          const timeSeries = data["Time Series (5min)"];
-          const timestamps = Object.keys(timeSeries).sort().slice(-10); // Get last 10 entries chronologically
-          const prices = timestamps.map(time => parseFloat(timeSeries[time]["4. close"]));
-          const latestData = timeSeries[timestamps[timestamps.length - 1]];
-
-          const close = parseFloat(latestData["4. close"]);
-          const open = parseFloat(latestData["1. open"]);
-
-          // Update DOM
-          stockName.innerText = symbol;
-          stockPrice.innerText = `Price: $${close.toFixed(2)}`;
-          stockChange.innerText = `Change: ${(close - open).toFixed(2)} USD`;
-
-          displayChart(timestamps, prices, symbol);
-        } else {
-          alert("Error fetching stock data. Try again later.");
-        }
-      })
-      .catch(error => {
-        console.error("Error fetching stock data:", error);
-        alert("There was an error fetching the data. Please try again later.");
-      });
-  }
-
-  function displayChart(labels, data, symbol) {
-    // Destroy previous chart if it exists
-    if (chart) chart.destroy();
-
-    chart = new Chart(stockChartCanvas, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: `${symbol} Price`,
-          data: data,
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.2,
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Time'
-            }
-          },
-          y: {
-            title: {
-              display: true,
-              text: 'Price ($)'
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            display: true
-          }
-        }
-      }
-    });
-  }
 });
