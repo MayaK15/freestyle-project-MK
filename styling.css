@@ -94,7 +94,8 @@ hr {
 
 #chart {
     flex: 2;
-    background-color: #2c2c2c;
+    background-color: #29292b;
+    border-left: 5px solid #f8c8dc;
     border-radius: 10px;
     padding: 1rem;
     color: #fff;

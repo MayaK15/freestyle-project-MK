@@ -14,7 +14,16 @@
     <p>Enter a stock symbol (e.g., <strong>LVMUY</strong> for LVMH), then click Lookup.</p>
 
     <label>Stock Symbol:</label>
-    <input id="input-symbol" type="text" placeholder="LVMUY" value="LVMUY">
+    <select id="input-symbol">
+        <option value="LVMUY">LVMH (LVMUY)</option>
+        <option value="CPRI">Capri Holdings (CPRI)</option>
+        <option value="PPRUY">Kering (PPRUY)</option>
+        <option value="RMS.PA">Hermes (RMS.PA)</option>
+        <option value="CFRUY">Richemont (CFRUY)</option>
+        <option value="TPR">Tapestry (TPR)</option>
+        <option value="EL">Estée Lauder (EL)</option>
+        <option value="RL">Ralph Lauren (RL)</option>
+    </select>
     <button id="lookup">Lookup</button>
 
     <hr>
@@ -31,8 +40,7 @@
         </div>
 
         <div id="chart">
-            <!-- Placeholder for the chart -->
-            <svg id="stock-graph" width="500" height="300"></svg>
+            <svg id="stock-graph" width="500" height="250"></svg>
         </div>
     </div>
 
@@ -81,7 +89,6 @@
                 displayClose.innerText = stockData["4. close"]
                 displayVolume.innerText = stockData["5. volume"]
 
-                // Prepare data for graph
                 var graphData = Object.keys(timeSeries).map(function(date) {
                     return {
                         date: new Date(date),
@@ -89,7 +96,6 @@
                     };
                 });
 
-                // Call the function to render the chart
                 renderChart(graphData);
 
             }).catch(function(error) {
@@ -97,18 +103,18 @@
             })
         }
 
-        // Function to render the stock chart using D3.js
         function renderChart(data) {
             var svg = d3.select("#stock-graph");
-            var margin = { top: 20, right: 30, bottom: 40, left: 40 };
+            var margin = { top: 20, right: 30, bottom: 60, left: 50 }; // increased bottom margin for x-axis label
             var width = +svg.attr("width") - margin.left - margin.right;
             var height = +svg.attr("height") - margin.top - margin.bottom;
 
-            // Set up the chart area
+            // Clear the existing chart elements before rendering new ones
+            svg.selectAll("*").remove();
+
             var g = svg.append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            // Define the scales for x and y axes
             var x = d3.scaleTime()
                 .domain(d3.extent(data, function(d) { return d.date; }))
                 .range([0, width]);
@@ -117,7 +123,7 @@
                 .domain([0, d3.max(data, function(d) { return d.close; })])
                 .range([height, 0]);
 
-            // Add x-axis to the chart
+            // X-axis
             g.append("g")
                 .selectAll(".x-axis")
                 .data([data])
@@ -126,7 +132,7 @@
                 .attr("transform", "translate(0," + height + ")")
                 .call(d3.axisBottom(x));
 
-            // Add y-axis to the chart
+            // Y-axis
             g.append("g")
                 .selectAll(".y-axis")
                 .data([data])
@@ -134,7 +140,23 @@
                 .attr("class", "y-axis")
                 .call(d3.axisLeft(y));
 
-            // Add the line path
+            // X-axis label
+            svg.append("text")
+                .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.top + 50) + ")")
+                .style("text-anchor", "middle")
+                .attr("fill", "#f8c8dc")
+                .text("Date");
+
+            // Y-axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", margin.left - 35)
+                .attr("x", -(height / 2) - margin.top)
+                .style("text-anchor", "middle")
+                .attr("fill", "#f8c8dc")
+                .text("Closing Price (USD)");
+
+            // Line chart
             g.append("path")
                 .datum(data)
                 .attr("class", "line")
@@ -153,4 +175,3 @@
 
 </body>
 </html>
-
