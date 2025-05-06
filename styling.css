@@ -33,7 +33,7 @@
   
   header h1 {
     font-size: 2.5rem;
-    color: #2C3E50;
+    color: #000000;
     letter-spacing: 2px;
     margin-bottom: 10px;
   }
@@ -86,7 +86,7 @@
   
   #stock-info h2 {
     font-size: 1.5rem;
-    color: #5e3448;
+    color: #ff0088;
     margin-bottom: 20px;
   }
   
