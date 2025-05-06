@@ -8,6 +8,7 @@ This is a fashion stock information dashboard that fetches real-time stock data 
 2. Simultaneously, open the Alpha Vantage website, https://www.alphavantage.co/, to sign up for a free API key or use one of the seven premium API keys provided in class which are available in the class slack chat. Note: the code does not contain a hard-coded API key due to security reasons and as such the file will prompt you to manually load it when accessing the index.html. 
 3. When prompted in your browser, enter the API key in the text box to allow you to interact with the features on the webpage.
 4. Select one of the stocks in the dropdown and click the "lookup" button to view the stock information and visualization chart showing real-time stock prices.
+5. There is also the option of comparing two stocks at once in the stock comparison section, choose from the dropdown and press the compare button to view the data. 
 
 
 
