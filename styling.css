@@ -94,7 +94,7 @@ hr {
 
 #chart {
     flex: 2;
-   background-color: #29292b;
+    background-color: #29292b;
     border-left: 5px solid #f8c8dc;
     border-radius: 12px;
     padding: 1rem 1.5rem;
@@ -123,5 +123,56 @@ hr {
 
     #display-stock-info {
         max-width: 100%;
+    }
+}
+
+#compare-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Side-by-side columns for stock info */
+#compare-stock-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* Individual stock info boxes */
+.compare-column {
+    flex: 1;
+    background-color: #29292b;
+    border-left: 5px solid #f8c8dc;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0px 2px 12px rgba(248, 200, 220, 0.2);
+    color: #fff;
+    max-width: 100%;
+}
+
+/* Chart styling */
+#compare-chart {
+    background-color: #29292b;
+    border-left: 5px solid #f8c8dc;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    color: #fff;
+    box-shadow: 0px 2px 12px rgba(248, 200, 220, 0.2);
+}
+
+/* Responsive behavior */
+@media (max-width: 600px) {
+    #compare-stock-info {
+        flex-direction: column;
+    }
+
+    .compare-column {
+        max-width: 100%;
+    }
+
+    #compare-chart {
+        width: 100%;
     }
 }

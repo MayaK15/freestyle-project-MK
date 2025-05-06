@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fashion Stocks Dashboard</title>
     <link rel="stylesheet" href="styling.css">
-    <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
 
@@ -28,7 +27,6 @@
     </select>
     <button id="lookup">Lookup</button>
 
-    <hr>
     <h2>Stock Information</h2>
     <div class="flex-container">
         <div id="display-stock-info">
@@ -41,7 +39,7 @@
         </div>
 
         <div id="chart">
-            <svg id="stock-graph" width="500" height="250"></svg>
+            <svg id="stock-graph" width="700" height="250"></svg>
         </div>
     </div>
     <hr>
@@ -71,25 +69,29 @@
     <button id="compare">Compare</button>
 
     <h3>Comparison Information</h3>
-    <div id="compare-stock-info">
-        <p>Stock 1 Date: <span id="compare-stock1-date">---</span></p>
-        <p>Stock 1 Open: <span id="compare-stock1-open">---</span></p>
-        <p>Stock 1 High: <span id="compare-stock1-high">---</span></p>
-        <p>Stock 1 Low: <span id="compare-stock1-low">---</span></p>
-        <p>Stock 1 Close: <span id="compare-stock1-close">---</span></p>
-        <p>Stock 1 Volume: <span id="compare-stock1-volume">---</span></p>
-
-        <p>Stock 2 Date: <span id="compare-stock2-date">---</span></p>
-        <p>Stock 2 Open: <span id="compare-stock2-open">---</span></p>
-        <p>Stock 2 High: <span id="compare-stock2-high">---</span></p>
-        <p>Stock 2 Low: <span id="compare-stock2-low">---</span></p>
-        <p>Stock 2 Close: <span id="compare-stock2-close">---</span></p>
-        <p>Stock 2 Volume: <span id="compare-stock2-volume">---</span></p>
-    </div>
-    <div id="compare-chart">
-        <svg id="compare-stock-graph" width="500" height="250"></svg>
-    </div>
-    
+    <div id="compare-container">
+        <div id="compare-stock-info">
+          <div class="compare-column" id="compare-stock1">
+                <p>Stock 1 Date: <span id="compare-stock1-date">---</span></p>
+                <p>Stock 1 Open: <span id="compare-stock1-open">---</span></p>
+                <p>Stock 1 High: <span id="compare-stock1-high">---</span></p>
+                <p>Stock 1 Low: <span id="compare-stock1-low">---</span></p>
+                <p>Stock 1 Close: <span id="compare-stock1-close">---</span></p>
+                <p>Stock 1 Volume: <span id="compare-stock1-volume">---</span></p>
+            </div>
+            <div class="compare-column" id="compare-stock2">
+                <p>Stock 2 Date: <span id="compare-stock2-date">---</span></p>
+                <p>Stock 2 Open: <span id="compare-stock2-open">---</span></p>
+                <p>Stock 2 High: <span id="compare-stock2-high">---</span></p>
+                <p>Stock 2 Low: <span id="compare-stock2-low">---</span></p>
+                <p>Stock 2 Close: <span id="compare-stock2-close">---</span></p>
+                <p>Stock 2 Volume: <span id="compare-stock2-volume">---</span></p>
+            </div>
+        </div>
+        <div id="compare-chart">
+            <svg id="compare-stock-graph" width="1080" height="250"></svg>
+          </div>
+        </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -308,7 +310,7 @@
                 .enter().append("path")
                 .attr("class", "line")
                 .attr("d", line1)
-                .style("stroke", "steelblue")
+                .style("stroke", "#f8c8dc")  // Updated color
                 .style("fill", "none")
                 .style("stroke-width", 2);
 
@@ -318,7 +320,7 @@
                 .enter().append("path")
                 .attr("class", "line")
                 .attr("d", line2)
-                .style("stroke", "orange")
+                .style("stroke", "#f27dae")  // Updated color
                 .style("fill", "none")
                 .style("stroke-width", 2);
 
@@ -330,9 +332,29 @@
             g.append("g")
                 .attr("class", "y axis")
                 .call(d3.axisLeft(y).ticks(5));
+
+            // X-axis label
+            g.append("text")
+                .attr("class", "x-axis-label")
+                .attr("x", width / 2)
+                .attr("y", height + 40)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#fff")
+                .style("font-size", "14px")
+                .text("Date");
+
+            // Y-axis label
+            g.append("text")
+                .attr("class", "y-axis-label")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -40)
+                .attr("x", -height / 2)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#fff")
+                .style("font-size", "14px")
+                .text("Closing Price (USD)");
         }
-
-
+            
         lookupButton.addEventListener("click", lookupStock, false);
         compareButton.addEventListener("click", compareStocks);
 
