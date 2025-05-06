@@ -86,19 +86,20 @@
   
   #stock-info h2 {
     font-size: 1.5rem;
-    color: #34495e;
+    color: #5e3448;
     margin-bottom: 20px;
   }
   
   #stock-info p {
     font-size: 1rem;
-    color: #7f8c8d;
+    color: #ff0088;
     margin: 10px 0;
   }
   
   /* Stock Chart Section */
   #stock-chart {
     height: 500px;
+    width: 890px;
     margin-top: 20px;
     background-color: #ecf0f1;
     border-radius: 8px;
@@ -106,7 +107,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #95a5a6;
+    color: #ff0088;
     font-size: 1.2rem;
   }
   
