@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fashion Stocks Dashboard</title>
     <link rel="stylesheet" href="styling.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
 
@@ -13,6 +15,7 @@
     <p>Great! This is the place for you. First, obtain an Alpha Vantage API Key and enter it when prompted. We recommend using one of the 7 Premium API Keys provided in class. </p>
     <p>Then, choose from the below dropdown a stock symbol that most appeals to you (e.g., <strong>LVMUY</strong> for LVMH), and click the lookup button to display the stock information.</p>
 
+    <h2>Stock Lookup</h2>
     <label>Stock Symbol:</label>
     <select id="input-symbol">
         <option value="LVMUY">LVMH (LVMUY)</option>
@@ -27,7 +30,6 @@
 
     <hr>
     <h2>Stock Information</h2>
-
     <div class="flex-container">
         <div id="display-stock-info">
             <p>Date: <span id="display-date">---</span></p>
@@ -42,6 +44,53 @@
             <svg id="stock-graph" width="500" height="250"></svg>
         </div>
     </div>
+    <hr>
+
+    <!-- Stock Comparison Section -->
+    <h2>Stock Comparison</h2>
+    <label>Stock Symbol 1:</label>
+    <select id="input-symbol1">
+        <option value="LVMUY">LVMH (LVMUY)</option>
+        <option value="CPRI">Capri Holdings (CPRI)</option>
+        <option value="PPRUY">Kering (PPRUY)</option>
+        <option value="CFRUY">Richemont (CFRUY)</option>
+        <option value="TPR">Tapestry (TPR)</option>
+        <option value="EL">Estée Lauder (EL)</option>
+        <option value="RL">Ralph Lauren (RL)</option>
+    </select>
+    <label>Stock Symbol 2:</label>
+    <select id="input-symbol2">
+        <option value="LVMUY">LVMH (LVMUY)</option>
+        <option value="CPRI">Capri Holdings (CPRI)</option>
+        <option value="PPRUY">Kering (PPRUY)</option>
+        <option value="CFRUY">Richemont (CFRUY)</option>
+        <option value="TPR">Tapestry (TPR)</option>
+        <option value="EL">Estée Lauder (EL)</option>
+        <option value="RL">Ralph Lauren (RL)</option>
+    </select>
+    <button id="compare">Compare</button>
+
+    <h3>Comparison Information</h3>
+    <div id="compare-stock-info">
+        <p>Stock 1 Date: <span id="compare-stock1-date">---</span></p>
+        <p>Stock 1 Open: <span id="compare-stock1-open">---</span></p>
+        <p>Stock 1 High: <span id="compare-stock1-high">---</span></p>
+        <p>Stock 1 Low: <span id="compare-stock1-low">---</span></p>
+        <p>Stock 1 Close: <span id="compare-stock1-close">---</span></p>
+        <p>Stock 1 Volume: <span id="compare-stock1-volume">---</span></p>
+
+        <p>Stock 2 Date: <span id="compare-stock2-date">---</span></p>
+        <p>Stock 2 Open: <span id="compare-stock2-open">---</span></p>
+        <p>Stock 2 High: <span id="compare-stock2-high">---</span></p>
+        <p>Stock 2 Low: <span id="compare-stock2-low">---</span></p>
+        <p>Stock 2 Close: <span id="compare-stock2-close">---</span></p>
+        <p>Stock 2 Volume: <span id="compare-stock2-volume">---</span></p>
+    </div>
+    <div id="compare-chart">
+        <svg id="compare-stock-graph" width="500" height="250"></svg>
+    </div>
+    
+
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script type="text/javascript">
@@ -51,9 +100,9 @@
             apiKey = prompt("Please enter your AlphaVantage API key:")
             sessionStorage.setItem("ALPHAVANTAGE_API_KEY", apiKey)
         }
-
-        var inputSymbol = document.getElementById("input-symbol")
-        var lookupButton = document.getElementById("lookup")
+        var inputSymbol = document.getElementById("input-symbol");
+        var lookupButton = document.getElementById("lookup");
+        var compareButton = document.getElementById("compare");
 
         var displayDate = document.getElementById("display-date")
         var displayOpen = document.getElementById("display-open")
@@ -61,6 +110,25 @@
         var displayLow = document.getElementById("display-low")
         var displayClose = document.getElementById("display-close")
         var displayVolume = document.getElementById("display-volume")
+
+
+        var compareStock1Date = document.getElementById("compare-stock1-date");
+        var compareStock1Open = document.getElementById("compare-stock1-open");
+        var compareStock1High = document.getElementById("compare-stock1-high");
+        var compareStock1Low = document.getElementById("compare-stock1-low");
+        var compareStock1Close = document.getElementById("compare-stock1-close");
+        var compareStock1Volume = document.getElementById("compare-stock1-volume");
+
+        var compareStock2Date = document.getElementById("compare-stock2-date");
+        var compareStock2Open = document.getElementById("compare-stock2-open");
+        var compareStock2High = document.getElementById("compare-stock2-high");
+        var compareStock2Low = document.getElementById("compare-stock2-low");
+        var compareStock2Close = document.getElementById("compare-stock2-close");
+        var compareStock2Volume = document.getElementById("compare-stock2-volume");
+
+        var stockData1 = null;
+        var stockData2 = null;
+
 
         // Fetching and displaying stock data
         function lookupStock() {
@@ -96,7 +164,6 @@
                 });
 
                 renderChart(graphData);
-
             }).catch(function(error) {
                 console.error("ERROR:", error)
             })
@@ -122,53 +189,152 @@
                 .domain([0, d3.max(data, function(d) { return d.close; })])
                 .range([height, 0]);
 
-            // X-axis
-            g.append("g")
-                .selectAll(".x-axis")
-                .data([data])
-                .enter().append("g")
-                .attr("class", "x-axis")
-                .attr("transform", "translate(0," + height + ")")
+            
+                g.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "#f8c8dc")
+                    .attr("stroke-width", 1.5)
+                    .attr("d", d3.line()
+                        .x(d => x(d.date))
+                        .y(d => y(d.close)));
+
+                g.append("g")
+                .attr("transform", `translate(0,${height})`)
                 .call(d3.axisBottom(x));
 
-            // Y-axis
-            g.append("g")
-                .selectAll(".y-axis")
-                .data([data])
-                .enter().append("g")
-                .attr("class", "y-axis")
+                g.append("g")
                 .call(d3.axisLeft(y));
 
-            // X-axis label
-            svg.append("text")
-                .attr("transform", "translate(" + (width / 2 + margin.left) + " ," + (height + margin.top + 50) + ")")
+                svg.append("text")
+                .attr("transform", `translate(${width / 2 + margin.left},${height + margin.top + 50})`)
                 .style("text-anchor", "middle")
                 .attr("fill", "#f8c8dc")
                 .text("Date");
 
-            // Y-axis label
-            svg.append("text")
+                svg.append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", margin.left - 35)
                 .attr("x", -(height / 2) - margin.top)
                 .style("text-anchor", "middle")
                 .attr("fill", "#f8c8dc")
                 .text("Closing Price (USD)");
+            }
 
-            // Line chart
-            g.append("path")
-                .datum(data)
-                .attr("class", "line")
-                .attr("fill", "none")
-                .attr("stroke", "#f8c8dc")
-                .attr("stroke-width", 1.5)
-                .attr("d", d3.line()
-                    .x(function(d) { return x(d.date); })
-                    .y(function(d) { return y(d.close); })
-                );
+        function compareStocks() {
+            var symbol1 = document.getElementById("input-symbol1").value;
+            var symbol2 = document.getElementById("input-symbol2").value;
+
+            var requestUrl1 = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol1}&apikey=${apiKey}`;
+            var requestUrl2 = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol2}&apikey=${apiKey}`;
+
+            Promise.all([d3.json(requestUrl1), d3.json(requestUrl2)]).then(function([data1, data2]) {
+
+                if (!data1["Time Series (Daily)"] || !data2["Time Series (Daily)"]) {
+                    console.error("Invalid symbol or response");
+                    alert("Invalid symbols or API error. Check console.");
+                    return;
+                }
+
+                var timeSeries1 = data1["Time Series (Daily)"];
+                var timeSeries2 = data2["Time Series (Daily)"];
+                var latestDate1 = Object.keys(timeSeries1)[0];
+                var latestDate2 = Object.keys(timeSeries2)[0];
+                compareStock1Date.innerText = latestDate1;
+                compareStock1Open.innerText = timeSeries1[latestDate1]["1. open"];
+                compareStock1High.innerText = timeSeries1[latestDate1]["2. high"];
+                compareStock1Low.innerText = timeSeries1[latestDate1]["3. low"];
+                compareStock1Close.innerText = timeSeries1[latestDate1]["4. close"];
+                compareStock1Volume.innerText = timeSeries1[latestDate1]["5. volume"];
+
+                compareStock2Date.innerText = latestDate2;
+                compareStock2Open.innerText = timeSeries2[latestDate2]["1. open"];
+                compareStock2High.innerText = timeSeries2[latestDate2]["2. high"];
+                compareStock2Low.innerText = timeSeries2[latestDate2]["3. low"];
+                compareStock2Close.innerText = timeSeries2[latestDate2]["4. close"];
+                compareStock2Volume.innerText = timeSeries2[latestDate2]["5. volume"];
+
+                var graphData1 = Object.keys(timeSeries1).map(function(date) {
+                    return {
+                        date: new Date(date),
+                        close: parseFloat(timeSeries1[date]["4. close"])
+                    };
+                });
+
+                var graphData2 = Object.keys(timeSeries2).map(function(date) {
+                    return {
+                        date: new Date(date),
+                        close: parseFloat(timeSeries2[date]["4. close"])
+                    };
+                });
+
+                renderComparisonChart(graphData1, graphData2);
+            }).catch(function(error) {
+                console.error("ERROR:", error);
+            });
         }
 
-        lookupButton.addEventListener("click", lookupStock, false)
+        function renderComparisonChart(data1, data2) {
+            var svg = d3.select("#compare-stock-graph");
+            var margin = { top: 20, right: 30, bottom: 60, left: 50 };
+            var width = +svg.attr("width") - margin.left - margin.right;
+            var height = +svg.attr("height") - margin.top - margin.bottom;
+
+            svg.selectAll("*").remove();
+
+            var g = svg.append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var x = d3.scaleTime()
+                .domain(d3.extent([...data1, ...data2], function(d) { return d.date; }))
+                .range([0, width]);
+
+            var y = d3.scaleLinear()
+                .domain([0, d3.max([...data1, ...data2], function(d) { return d.close; })])
+                .nice()
+                .range([height, 0]);
+
+            var line1 = d3.line()
+                .x(function(d) { return x(d.date); })
+                .y(function(d) { return y(d.close); });
+
+            var line2 = d3.line()
+                .x(function(d) { return x(d.date); })
+                .y(function(d) { return y(d.close); });
+
+            g.append("g")
+                .selectAll(".line1")
+                .data([data1])
+                .enter().append("path")
+                .attr("class", "line")
+                .attr("d", line1)
+                .style("stroke", "steelblue")
+                .style("fill", "none")
+                .style("stroke-width", 2);
+
+            g.append("g")
+                .selectAll(".line2")
+                .data([data2])
+                .enter().append("path")
+                .attr("class", "line")
+                .attr("d", line2)
+                .style("stroke", "orange")
+                .style("fill", "none")
+                .style("stroke-width", 2);
+
+            g.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x).ticks(5));
+
+            g.append("g")
+                .attr("class", "y axis")
+                .call(d3.axisLeft(y).ticks(5));
+        }
+
+
+        lookupButton.addEventListener("click", lookupStock, false);
+        compareButton.addEventListener("click", compareStocks);
 
     </script>
 
