@@ -1,38 +1,46 @@
 document.addEventListener("DOMContentLoaded", () => {
-    let token = sessionStorage.getItem("spotifyToken");
+    const playlistContainer = document.getElementById("playlist-container");
+    const moodButtons = document.querySelectorAll("[data-mood]");
   
-    if (!token) {
-      token = prompt("Enter your Spotify access token:");
-      sessionStorage.setItem("spotifyToken", token);
+    function getToken() {
+      let token = sessionStorage.getItem("spotifyToken");
+      if (!token) {
+        token = prompt("Enter your Spotify access token:");
+        if (token) {
+          sessionStorage.setItem("spotifyToken", token);
+        } else {
+          alert("Access token is required to use the app.");
+        }
+      }
+      return token;
     }
   
-    const moodButtons = document.querySelectorAll("[data-mood]");
-    const playlistContainer = document.getElementById("playlist-container");
+    async function fetchPlaylists(mood) {
+      const token = getToken();
+      if (!token) return;
   
-    moodButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const mood = button.getAttribute("data-mood");
-        fetchPlaylists(mood);
-      });
-    });
-  
-    function fetchPlaylists(mood) {
       playlistContainer.innerHTML = "<p>Loading playlists...</p>";
   
-      fetch(`https://api.spotify.com/v1/search?q=${mood}&type=playlist&limit=8`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      try {
+        const response = await fetch(
+          `https://api.spotify.com/v1/search?q=${encodeURIComponent(mood)}&type=playlist&limit=8`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        if (!response.ok) {
+          throw new Error("Invalid or expired token. Please try again.");
         }
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Invalid token or error fetching data");
-        return response.json();
-      })
-      .then(data => {
+  
+        const data = await response.json();
         playlistContainer.innerHTML = "";
+  
         const playlists = data.playlists.items;
   
-        playlists.forEach(playlist => {
+        playlists.forEach((playlist) => {
           const div = document.createElement("div");
           div.className = "playlist";
           div.innerHTML = `
@@ -42,9 +50,17 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
           playlistContainer.appendChild(div);
         });
-      })
-      .catch(err => {
+      } catch (err) {
         playlistContainer.innerHTML = `<p>Error: ${err.message}</p>`;
-      });
+        sessionStorage.removeItem("spotifyToken"); // clear invalid token
+        setTimeout(() => location.reload(), 2000); // reload to re-prompt
+      }
     }
+  
+    moodButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const mood = button.getAttribute("data-mood");
+        fetchPlaylists(mood);
+      });
+    });
   });
