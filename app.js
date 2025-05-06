@@ -1,66 +1,54 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const playlistContainer = document.getElementById("playlist-container");
-    const moodButtons = document.querySelectorAll("[data-mood]");
+    const stockButtons = document.querySelectorAll(".stock-btn");
+    const stockName = document.getElementById("stock-name");
+    const stockPrice = document.getElementById("stock-price");
+    const stockChange = document.getElementById("stock-change");
   
-    function getToken() {
-      let token = sessionStorage.getItem("spotifyToken");
-      if (!token) {
-        token = prompt("Enter your Spotify access token:");
-        if (token) {
-          sessionStorage.setItem("spotifyToken", token);
-        } else {
-          alert("Access token is required to use the app.");
-        }
-      }
-      return token;
-    }
+    const API_KEY = 'YOUR_ALPHA_VANTAGE_API_KEY';  // Replace with your API key
+    const API_URL = 'https://www.alphavantage.co/query';
   
-    async function fetchPlaylists(mood) {
-      const token = getToken();
-      if (!token) return;
-  
-      playlistContainer.innerHTML = "<p>Loading playlists...</p>";
-  
-      try {
-        const response = await fetch(
-          `https://api.spotify.com/v1/search?q=${encodeURIComponent(mood)}&type=playlist&limit=8`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-  
-        if (!response.ok) {
-          throw new Error("Invalid or expired token. Please try again.");
-        }
-  
-        const data = await response.json();
-        playlistContainer.innerHTML = "";
-  
-        const playlists = data.playlists.items;
-  
-        playlists.forEach((playlist) => {
-          const div = document.createElement("div");
-          div.className = "playlist";
-          div.innerHTML = `
-            <img src="${playlist.images[0]?.url}" alt="Cover">
-            <p><strong>${playlist.name}</strong></p>
-            <a href="${playlist.external_urls.spotify}" target="_blank">Open in Spotify</a>
-          `;
-          playlistContainer.appendChild(div);
-        });
-      } catch (err) {
-        playlistContainer.innerHTML = `<p>Error: ${err.message}</p>`;
-        sessionStorage.removeItem("spotifyToken"); // clear invalid token
-        setTimeout(() => location.reload(), 2000); // reload to re-prompt
-      }
-    }
-  
-    moodButtons.forEach((button) => {
+    // Fetch stock data when a button is clicked
+    stockButtons.forEach(button => {
       button.addEventListener("click", () => {
-        const mood = button.getAttribute("data-mood");
-        fetchPlaylists(mood);
+        const stockSymbol = button.getAttribute("data-symbol");
+        fetchStockData(stockSymbol);
       });
     });
+  
+    // Function to fetch stock data
+    async function fetchStockData(symbol) {
+      try {
+        const response = await fetch(`${API_URL}?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`);
+        const data = await response.json();
+  
+        if (data["Time Series (5min)"]) {
+          const latestTime = Object.keys(data["Time Series (5min)"])[0];
+          const stockData = data["Time Series (5min)"][latestTime];
+  
+          // Display stock data
+          stockName.innerText = symbol;
+          stockPrice.innerText = `Price: $${stockData["4. close"]}`;
+          stockChange.innerText = `Change: ${parseFloat(stockData["4. close"]) - parseFloat(stockData["1. open"])} USD`;
+  
+          // Optional: Display chart data or historical data
+          displayChart(data["Time Series (5min)"]);
+        } else {
+          alert("Error fetching stock data");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  
+    // Optional: Add a function to display a chart using a library (like Chart.js)
+    function displayChart(timeSeries) {
+      const labels = Object.keys(timeSeries).slice(0, 10);  // Last 10 time intervals
+      const prices = labels.map(time => parseFloat(timeSeries[time]["4. close"]));
+  
+      // Example of chart rendering (you can replace this with a Chart.js implementation)
+      const chartContainer = document.getElementById("stock-chart");
+      chartContainer.innerHTML = `
+        <p>Display Chart (replace this with Chart.js or another chart library)</p>
+      `;
+    }
   });

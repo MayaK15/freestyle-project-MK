@@ -1,28 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Musync – Sync your sound to your life</title>
-    <link rel="stylesheet" href="styling.css" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fashion Stocks Dashboard</title>
+  <link rel="stylesheet" href="styling.css">
 </head>
 <body>
+  <header>
+    <h1>Fashion Stocks Dashboard</h1>
+  </header>
+  
+  <div id="stock-list">
+    <button class="stock-btn" data-symbol="MC.PA">LVMH</button>
+    <button class="stock-btn" data-symbol="CPRI">Capri Holdings</button>
+    <button class="stock-btn" data-symbol="TPR">Tapestry</button>
+    <button class="stock-btn" data-symbol="ITX.MC">Inditex</button>
+    <button class="stock-btn" data-symbol="EL">Estée Lauder</button>
+    <button class="stock-btn" data-symbol="RL">Ralph Lauren</button>
+  </div>
 
+  <div id="stock-info">
+    <h2>Stock Information</h2>
+    <p id="stock-name"></p>
+    <p id="stock-price"></p>
+    <p id="stock-change"></p>
+    <div id="stock-chart"></div>
+  </div>
 
-<div class="container">
-    <h1> Musync </h1>
-    <p>What's your vibe today?</p>
-    <div class="mood-buttons">
-        <button data-mood="morning">Rise & Shine 🌞</button>
-        <button data-mood="gloomy">Rainy Day 🌧️</button>
-        <button data-mood="commute">Transit Beats 🚗</button>
-        <button data-mood="study">Focus Flow 📚</button>
-        <button data-mood="party">Party Fuel 🔥</button>
-    </div>
-    <div id="playlist-container"></div>
-    
-</div>
-<script src="app.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
