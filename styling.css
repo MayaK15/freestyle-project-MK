@@ -94,11 +94,12 @@ hr {
 
 #chart {
     flex: 2;
-    background-color: #29292b;
+   background-color: #29292b;
     border-left: 5px solid #f8c8dc;
-    border-radius: 10px;
-    padding: 1rem;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
     color: #fff;
+    box-shadow: 0px 2px 12px rgba(248, 200, 220, 0.2);
 }
 
 /* Responsive layout for smaller screens */
