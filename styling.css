@@ -162,6 +162,81 @@ hr {
     box-shadow: 0px 2px 12px rgba(248, 200, 220, 0.2);
 }
 
+@media (max-width: 600px) {
+    body {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    p {
+        font-size: 0.9rem;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .flex-container {
+        flex-direction: column;
+    }
+
+    #display-stock-info, #chart {
+        max-width: 100%;
+    }
+}
+
+#compare-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Side-by-side columns for stock info */
+#compare-stock-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* Individual stock info boxes */
+.compare-column {
+    flex: 1;
+    background-color: #29292b;
+    border-left: 5px solid #f8c8dc;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0px 2px 12px rgba(248, 200, 220, 0.2);
+    color: #fff;
+    max-width: 100%;
+}
+
+.compare-column:hover {
+    box-shadow: 0px 4px 18px rgba(248, 200, 220, 0.3);
+}
+
+/* Chart styling */
+#compare-chart {
+    background-color: #29292b;
+    border-left: 5px solid #f8c8dc;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    color: #fff;
+    box-shadow: 0px 2px 12px rgba(248, 200, 220, 0.2);
+}
+
 /* Responsive behavior */
 @media (max-width: 600px) {
     #compare-stock-info {
