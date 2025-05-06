@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Fashion Stocks Dashboard</title>
+    <link rel="stylesheet" href="styling.css">
 </head>
 <body>
 
     <h1>Fashion Stocks Dashboard</h1>
-    <a href="../index.html">Home</a>
-
-    <h2>Setup</h2>
-    <p>Obtain an Alpha Vantage API Key and enter it when prompted.</p>
 
     <h2>Instructions</h2>
+    <p>Obtain an Alpha Vantage API Key and enter it when prompted.</p>
     <p>Enter a stock symbol (e.g., <strong>LVMUY</strong> for LVMH), then click Lookup.</p>
 
     <label>Stock Symbol:</label>
@@ -21,26 +19,32 @@
 
     <hr>
     <h2>Stock Information</h2>
-    <div id="display-stock-info">
-        <p>Date: <span id="display-date">---</span></p>
-        <p>Open: <span id="display-open">---</span></p>
-        <p>High: <span id="display-high">---</span></p>
-        <p>Low: <span id="display-low">---</span></p>
-        <p>Close: <span id="display-close">---</span></p>
-        <p>Volume: <span id="display-volume">---</span></p>
+
+    <div class="flex-container">
+        <div id="display-stock-info">
+            <p>Date: <span id="display-date">---</span></p>
+            <p>Open: <span id="display-open">---</span></p>
+            <p>High: <span id="display-high">---</span></p>
+            <p>Low: <span id="display-low">---</span></p>
+            <p>Close: <span id="display-close">---</span></p>
+            <p>Volume: <span id="display-volume">---</span></p>
+        </div>
+
+        <div id="chart">
+            <!-- Placeholder for the chart -->
+            <svg id="stock-graph" width="500" height="300"></svg>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script type="text/javascript">
 
-        // Avoid hard-coding credentials
         var apiKey = sessionStorage.getItem("ALPHAVANTAGE_API_KEY")
         if (!apiKey) {
             apiKey = prompt("Please enter your AlphaVantage API key:")
             sessionStorage.setItem("ALPHAVANTAGE_API_KEY", apiKey)
         }
 
-        // Element references
         var inputSymbol = document.getElementById("input-symbol")
         var lookupButton = document.getElementById("lookup")
 
@@ -51,7 +55,7 @@
         var displayClose = document.getElementById("display-close")
         var displayVolume = document.getElementById("display-volume")
 
-        // Function to fetch and display stock data
+        // Fetching and displaying stock data
         function lookupStock() {
             var symbol = inputSymbol.value
             console.log("SYMBOL:", symbol)
@@ -70,7 +74,6 @@
                 var latestDate = Object.keys(timeSeries)[0]
                 var stockData = timeSeries[latestDate]
 
-                // Display stock info
                 displayDate.innerText = latestDate
                 displayOpen.innerText = stockData["1. open"]
                 displayHigh.innerText = stockData["2. high"]
@@ -78,18 +81,76 @@
                 displayClose.innerText = stockData["4. close"]
                 displayVolume.innerText = stockData["5. volume"]
 
+                // Prepare data for graph
+                var graphData = Object.keys(timeSeries).map(function(date) {
+                    return {
+                        date: new Date(date),
+                        close: parseFloat(timeSeries[date]["4. close"])
+                    };
+                });
+
+                // Call the function to render the chart
+                renderChart(graphData);
+
             }).catch(function(error) {
                 console.error("ERROR:", error)
             })
         }
 
-        // On page load
-        lookupStock()
+        // Function to render the stock chart using D3.js
+        function renderChart(data) {
+            var svg = d3.select("#stock-graph");
+            var margin = { top: 20, right: 30, bottom: 40, left: 40 };
+            var width = +svg.attr("width") - margin.left - margin.right;
+            var height = +svg.attr("height") - margin.top - margin.bottom;
 
-        // On button click
+            // Set up the chart area
+            var g = svg.append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // Define the scales for x and y axes
+            var x = d3.scaleTime()
+                .domain(d3.extent(data, function(d) { return d.date; }))
+                .range([0, width]);
+
+            var y = d3.scaleLinear()
+                .domain([0, d3.max(data, function(d) { return d.close; })])
+                .range([height, 0]);
+
+            // Add x-axis to the chart
+            g.append("g")
+                .selectAll(".x-axis")
+                .data([data])
+                .enter().append("g")
+                .attr("class", "x-axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            // Add y-axis to the chart
+            g.append("g")
+                .selectAll(".y-axis")
+                .data([data])
+                .enter().append("g")
+                .attr("class", "y-axis")
+                .call(d3.axisLeft(y));
+
+            // Add the line path
+            g.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("fill", "none")
+                .attr("stroke", "#f8c8dc")
+                .attr("stroke-width", 1.5)
+                .attr("d", d3.line()
+                    .x(function(d) { return x(d.date); })
+                    .y(function(d) { return y(d.close); })
+                );
+        }
+
         lookupButton.addEventListener("click", lookupStock, false)
 
     </script>
 
 </body>
 </html>
+
