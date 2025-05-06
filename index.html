@@ -11,8 +11,11 @@
     <h1>Fashion Stocks Dashboard</h1>
 
     <h2>Interested in Fashion Stocks?</h2>
-    <p>Great! This is the place for you. First, obtain an Alpha Vantage API Key and enter it when prompted. We recommend using one of the 7 Premium API Keys provided in class. </p>
+    <p>Great! This is the place for you. </p>
+    <p>First, obtain an Alpha Vantage API Key and enter it when prompted. We recommend using one of the 7 Premium API Keys provided in class. </p>
     <p>Then, choose from the below dropdown a stock symbol that most appeals to you (e.g., <strong>LVMUY</strong> for LVMH), and click the lookup button to display the stock information.</p>
+    <p>If you want to compare the information of two stocks, scroll down to choose from the dropdown in the Stock Comparison section and click the compare button to view the stock information</p>
+
 
     <h2>Stock Lookup</h2>
     <label>Stock Symbol:</label>
@@ -127,9 +130,6 @@
         var compareStock2Low = document.getElementById("compare-stock2-low");
         var compareStock2Close = document.getElementById("compare-stock2-close");
         var compareStock2Volume = document.getElementById("compare-stock2-volume");
-
-        var stockData1 = null;
-        var stockData2 = null;
 
 
         // Fetching and displaying stock data
