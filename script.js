@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const stockChange = document.getElementById("stock-change");
   const stockChartCanvas = document.getElementById("stock-chart");
 
-  const API_KEY = 'FQ5NK3IRJOG6ALU1';
+  const API_KEY = 'XNC1V0YJ3C84UWJS';
   const API_URL = 'https://www.alphavantage.co/query';
 
   let chart; // Reference to the Chart.js chart
@@ -19,8 +19,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function fetchStockData(symbol) {
     fetch(`${API_URL}?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`)
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
+        console.log(data); // Log the response to inspect it
+
+        if (data["Note"]) {
+          alert("API Rate limit exceeded. Please wait a minute or try again later.");
+          stockName.innerText = "Rate limit exceeded";
+          stockPrice.innerText = "";
+          stockChange.innerText = "Please wait a minute.";
+          return;
+        }
+
         if (data["Time Series (5min)"]) {
           const timeSeries = data["Time Series (5min)"];
           const timestamps = Object.keys(timeSeries).sort().slice(-10); // Get last 10 entries chronologically
@@ -42,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(error => {
         console.error("Error fetching stock data:", error);
+        alert("There was an error fetching the data. Please try again later.");
       });
   }
 
