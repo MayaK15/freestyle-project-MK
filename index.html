@@ -1,33 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fashion Stocks Dashboard</title>
-  <link rel="stylesheet" href="styling.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <title>Fashion Stocks Dashboard</title>
 </head>
 <body>
 
-  <header>
     <h1>Fashion Stocks Dashboard</h1>
-  </header>
-  
-  <div id="stock-list">
-    <button class="stock-btn" data-symbol="CPRI">Capri Holdings</button>
-    <button class="stock-btn" data-symbol="TPR">Tapestry</button>
-    <button class="stock-btn" data-symbol="EL">Estée Lauder</button>
-    <button class="stock-btn" data-symbol="RL">Ralph Lauren</button>
-  </div>
+    <a href="../index.html">Home</a>
 
-  <div id="stock-info">
+    <h2>Setup</h2>
+    <p>Obtain an Alpha Vantage API Key and enter it when prompted.</p>
+
+    <h2>Instructions</h2>
+    <p>Enter a stock symbol (e.g., <strong>LVMUY</strong> for LVMH), then click Lookup.</p>
+
+    <label>Stock Symbol:</label>
+    <input id="input-symbol" type="text" placeholder="LVMUY" value="LVMUY">
+    <button id="lookup">Lookup</button>
+
+    <hr>
     <h2>Stock Information</h2>
-    <p id="stock-name"></p>
-    <p id="stock-price"></p>
-    <p id="stock-change"></p>
-    <canvas id="stock-chart"></canvas>
-  </div>
+    <div id="display-stock-info">
+        <p>Date: <span id="display-date">---</span></p>
+        <p>Open: <span id="display-open">---</span></p>
+        <p>High: <span id="display-high">---</span></p>
+        <p>Low: <span id="display-low">---</span></p>
+        <p>Close: <span id="display-close">---</span></p>
+        <p>Volume: <span id="display-volume">---</span></p>
+    </div>
 
-  <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script type="text/javascript">
+
+        // Avoid hard-coding credentials
+        var apiKey = sessionStorage.getItem("ALPHAVANTAGE_API_KEY")
+        if (!apiKey) {
+            apiKey = prompt("Please enter your AlphaVantage API key:")
+            sessionStorage.setItem("ALPHAVANTAGE_API_KEY", apiKey)
+        }
+
+        // Element references
+        var inputSymbol = document.getElementById("input-symbol")
+        var lookupButton = document.getElementById("lookup")
+
+        var displayDate = document.getElementById("display-date")
+        var displayOpen = document.getElementById("display-open")
+        var displayHigh = document.getElementById("display-high")
+        var displayLow = document.getElementById("display-low")
+        var displayClose = document.getElementById("display-close")
+        var displayVolume = document.getElementById("display-volume")
+
+        // Function to fetch and display stock data
+        function lookupStock() {
+            var symbol = inputSymbol.value
+            console.log("SYMBOL:", symbol)
+
+            var requestUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`
+            d3.json(requestUrl).then(function(data) {
+                console.log("RESPONSE:", data)
+
+                if (!data["Time Series (Daily)"]) {
+                    console.error("Invalid symbol or response")
+                    alert("Invalid symbol or API error. Check console.")
+                    return
+                }
+
+                var timeSeries = data["Time Series (Daily)"]
+                var latestDate = Object.keys(timeSeries)[0]
+                var stockData = timeSeries[latestDate]
+
+                // Display stock info
+                displayDate.innerText = latestDate
+                displayOpen.innerText = stockData["1. open"]
+                displayHigh.innerText = stockData["2. high"]
+                displayLow.innerText = stockData["3. low"]
+                displayClose.innerText = stockData["4. close"]
+                displayVolume.innerText = stockData["5. volume"]
+
+            }).catch(function(error) {
+                console.error("ERROR:", error)
+            })
+        }
+
+        // On page load
+        lookupStock()
+
+        // On button click
+        lookupButton.addEventListener("click", lookupStock, false)
+
+    </script>
+
 </body>
 </html>
